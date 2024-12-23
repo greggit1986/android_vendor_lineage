@@ -33,8 +33,13 @@ SOONG_CONFIG_lineageGlobalVars += \
     bootloader_message_offset \
     camera_override_format_from_reserved \
     gralloc_handle_has_custom_content_md_reserved_size \
+    disable_postrender_cleanup \
     gralloc_handle_has_reserved_size \
     gralloc_handle_has_ubwcp_format \
+    has_legacy_camera_hal1 \
+    has_memfd_backport \
+    needs_camera_boottime \
+    needs_netd_direct_connect_rule \
     target_health_charging_control_charging_path \
     target_health_charging_control_charging_enabled \
     target_health_charging_control_charging_disabled \
@@ -45,6 +50,7 @@ SOONG_CONFIG_lineageGlobalVars += \
     target_init_vendor_lib \
     target_ld_shim_libs \
     target_power_libperfmgr_mode_extension_lib \
+    target_process_sdk_version_override \
     target_powershare_path \
     target_powershare_enabled \
     target_powershare_disabled \
@@ -55,11 +61,64 @@ SOONG_CONFIG_lineageGlobalVars += \
 
 # Soong bool variables
 SOONG_CONFIG_lineageGlobalVars_camera_override_format_from_reserved := $(TARGET_CAMERA_OVERRIDE_FORMAT_FROM_RESERVED)
+    target_trust_usb_control_disable \
+    uses_camera_parameter_lib \
+    uses_egl_display_array
+
+SOONG_CONFIG_NAMESPACES += lineageNvidiaVars
+SOONG_CONFIG_lineageNvidiaVars += \
+    uses_nvidia_enhancements
+
+SOONG_CONFIG_NAMESPACES += lineageQcomVars
+SOONG_CONFIG_lineageQcomVars += \
+    qti_vibrator_effect_lib \
+    qti_vibrator_use_effect_stream \
+    supports_extended_compress_format \
+    uses_pre_uplink_features_netmgrd \
+    uses_qcom_bsp_legacy
+
+# Only create display_headers_namespace var if dealing with UM platforms to avoid breaking build for all other platforms
+ifneq ($(filter $(UM_PLATFORMS),$(TARGET_BOARD_PLATFORM)),)
+SOONG_CONFIG_lineageQcomVars += \
+    qcom_display_headers_namespace
+endif
+
+# Soong bool variables
+SOONG_CONFIG_lineageGlobalVars_camera_override_format_from_reserved := $(TARGET_CAMERA_OVERRIDE_FORMAT_FROM_RESERVED)
+SOONG_CONFIG_lineageGlobalVars_gralloc_handle_has_custom_content_md_reserved_size := $(TARGET_GRALLOC_HANDLE_HAS_CUSTOM_CONTENT_MD_RESERVED_SIZE)
+SOONG_CONFIG_lineageGlobalVars_disable_postrender_cleanup := $(TARGET_DISABLE_POSTRENDER_CLEANUP)
+SOONG_CONFIG_lineageGlobalVars_gralloc_handle_has_reserved_size := $(TARGET_GRALLOC_HANDLE_HAS_RESERVED_SIZE)
+SOONG_CONFIG_lineageGlobalVars_gralloc_handle_has_ubwcp_format := $(TARGET_GRALLOC_HANDLE_HAS_UBWCP_FORMAT)
+SOONG_CONFIG_lineageGlobalVars_has_legacy_camera_hal1 := $(TARGET_HAS_LEGACY_CAMERA_HAL1)
+SOONG_CONFIG_lineageGlobalVars_has_memfd_backport := $(TARGET_HAS_MEMFD_BACKPORT)
+SOONG_CONFIG_lineageGlobalVars_needs_camera_boottime := $(TARGET_CAMERA_BOOTTIME_TIMESTAMP)
+SOONG_CONFIG_lineageGlobalVars_needs_netd_direct_connect_rule := $(TARGET_NEEDS_NETD_DIRECT_CONNECT_RULE)
+SOONG_CONFIG_lineageGlobalVars_uses_egl_display_array := $(TARGET_USES_EGL_DISPLAY_ARRAY)
+SOONG_CONFIG_lineageNvidiaVars_uses_nvidia_enhancements := $(NV_ANDROID_FRAMEWORK_ENHANCEMENTS)
+SOONG_CONFIG_lineageQcomVars_qti_vibrator_use_effect_stream := $(TARGET_QTI_VIBRATOR_USE_EFFECT_STREAM)
+SOONG_CONFIG_lineageQcomVars_supports_extended_compress_format := $(AUDIO_FEATURE_ENABLED_EXTENDED_COMPRESS_FORMAT)
+SOONG_CONFIG_lineageQcomVars_uses_pre_uplink_features_netmgrd := $(TARGET_USES_PRE_UPLINK_FEATURES_NETMGRD)
+SOONG_CONFIG_lineageQcomVars_uses_qcom_bsp_legacy := $(TARGET_USES_QCOM_BSP_LEGACY)
 
 # Set default values
 BOOTLOADER_MESSAGE_OFFSET ?= 0
 TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS ?= 0
 TARGET_CAMERA_OVERRIDE_FORMAT_FROM_RESERVED ?= false
+TARGET_GRALLOC_HANDLE_HAS_CUSTOM_CONTENT_MD_RESERVED_SIZE ?= false
+TARGET_GRALLOC_HANDLE_HAS_RESERVED_SIZE ?= false
+TARGET_GRALLOC_HANDLE_HAS_UBWCP_FORMAT ?= false
+TARGET_HEALTH_CHARGING_CONTROL_CHARGING_ENABLED ?= 1
+TARGET_HEALTH_CHARGING_CONTROL_CHARGING_DISABLED ?= 0
+TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_BYPASS ?= true
+TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_DEADLINE ?= false
+TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_TOGGLE ?= true
+TARGET_INIT_VENDOR_LIB ?= vendor_init
+TARGET_POWER_LIBPERFMGR_MODE_EXTENSION_LIB ?= libperfmgr-ext
+TARGET_POWERSHARE_ENABLED ?= 1
+TARGET_POWERSHARE_DISABLED ?= 0
+TARGET_QTI_VIBRATOR_EFFECT_LIB ?= libqtivibratoreffect
+TARGET_SPECIFIC_CAMERA_PARAMETER_LIBRARY ?= libcamera_parameters
+TARGET_SURFACEFLINGER_UDFPS_LIB ?= surfaceflinger_udfps_lib
 TARGET_TRUST_USB_CONTROL_PATH ?= /proc/sys/kernel/deny_new_usb
 TARGET_TRUST_USB_CONTROL_ENABLE ?= 1
 TARGET_TRUST_USB_CONTROL_DISABLE ?= 0
@@ -78,6 +137,7 @@ SOONG_CONFIG_lineageGlobalVars_target_health_charging_control_supports_toggle :=
 SOONG_CONFIG_lineageGlobalVars_target_init_vendor_lib := $(TARGET_INIT_VENDOR_LIB)
 SOONG_CONFIG_lineageGlobalVars_target_ld_shim_libs := $(subst $(space),:,$(TARGET_LD_SHIM_LIBS))
 SOONG_CONFIG_lineageGlobalVars_target_power_libperfmgr_mode_extension_lib := $(TARGET_POWER_LIBPERFMGR_MODE_EXTENSION_LIB)
+SOONG_CONFIG_lineageGlobalVars_target_process_sdk_version_override := $(TARGET_PROCESS_SDK_VERSION_OVERRIDE)
 SOONG_CONFIG_lineageGlobalVars_target_powershare_path := $(TARGET_POWERSHARE_PATH)
 SOONG_CONFIG_lineageGlobalVars_target_powershare_enabled := $(TARGET_POWERSHARE_ENABLED)
 SOONG_CONFIG_lineageGlobalVars_target_powershare_disabled := $(TARGET_POWERSHARE_DISABLED)
@@ -136,4 +196,9 @@ endif
 # Vendor init
 ifneq ($(TARGET_INIT_VENDOR_LIB),)
     $(call soong_config_set,libinit,vendor_init_lib,$(TARGET_INIT_VENDOR_LIB))
+SOONG_CONFIG_lineageGlobalVars_uses_camera_parameter_lib := $(TARGET_SPECIFIC_CAMERA_PARAMETER_LIBRARY)
+ifneq ($(filter $(QSSI_SUPPORTED_PLATFORMS),$(TARGET_BOARD_PLATFORM)),)
+SOONG_CONFIG_lineageQcomVars_qcom_display_headers_namespace := vendor/qcom/opensource/commonsys-intf/display
+else
+SOONG_CONFIG_lineageQcomVars_qcom_display_headers_namespace := $(QCOM_SOONG_NAMESPACE)/display
 endif
