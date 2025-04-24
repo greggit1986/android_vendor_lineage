@@ -155,6 +155,11 @@ ifneq ($(TARGET_CAMERA_OVERRIDE_FORMAT_FROM_RESERVED),)
     $(call soong_config_set,camera,override_format_from_reserved,$(TARGET_CAMERA_OVERRIDE_FORMAT_FROM_RESERVED))
 endif
 
+# Libui
+ifneq ($(TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS),)
+    $(call soong_config_set,libui,additional_gralloc_10_usage_bits,$(TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS))
+endif
+
 # Lineage Health HAL
 ifneq ($(TARGET_HEALTH_CHARGING_CONTROL_CHARGING_PATH),)
     $(warning TARGET_HEALTH_CHARGING_CONTROL_CHARGING_PATH is deprecated, please migrate to soong_config_set,lineage_health,charging_control_charging_path)
