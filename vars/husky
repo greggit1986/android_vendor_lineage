@@ -2,30 +2,27 @@
 
 # Usage: ${device_repos[@]}
 device_repos=(
-  device/google/gs-common
   device/google/zuma
   device/google/shusky
 )
 
-readonly fbpk_version="v2"
-
 # Updated semi-manually via pixel/update-any-var.sh
 
-readonly build_id="AP2A.240805.005"
+readonly build_id="BP1A.250405.007.B1"
 
 # Updated automatically via pixel/update-device-vars.sh
 
-readonly prev_aosp_tag="android-14.0.0_r53"
-readonly aosp_tag="android-14.0.0_r55"
+readonly prev_aosp_tag="android-15.0.0_r20"
+readonly aosp_tag="android-15.0.0_r28"
 
-readonly build_number="12025142"
+readonly build_number="13240308"
 
-readonly image_url="https://dl.google.com/dl/android/aosp/husky-ap2a.240805.005-factory-06d11dac.zip"
-readonly image_sha256="06d11dac76a73c42b81a3b143f663ecc65b405b3ca45c35a6d1a18d98e7e0a6d"
+readonly image_url="https://dl.google.com/dl/android/aosp/husky-bp1a.250405.007.b1-factory-f8bcae5c.zip"
+readonly image_sha256="f8bcae5cd37f7a01af3b605054b67e6cb7863a13e902771fe02f48cc314a5708"
 
-readonly flash_url="https://flash.android.com/build/12025142?target=husky-user&signed"
+readonly flash_url="https://flash.android.com/build/13240308?target=husky-user&signed"
 
-readonly ota_url="https://dl.google.com/dl/android/aosp/husky-ota-ap2a.240805.005-0cbc4d6a.zip"
-readonly ota_sha256="0cbc4d6a62694b0eb7e24ad3d9f7d64a2c93f651175b8e8b13a712fd49b8be04"
+readonly ota_url="https://dl.google.com/dl/android/aosp/husky-ota-bp1a.250405.007.b1-d034f12f.zip"
+readonly ota_sha256="d034f12f0fb47528232dbd61445d92773a9bfc2d82e5d5063e2c5b0b893147aa"
 
-readonly security_patch="2024-08-05"
+readonly security_patch="2025-03-05"

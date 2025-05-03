@@ -15,6 +15,7 @@ PRODUCT_PRODUCT_PROPERTIES += \
 
 # Apps
 PRODUCT_PACKAGES += \
+    AvatarPicker \
     Backgrounds \
     Glimpse \
     LatinIME
@@ -78,9 +79,11 @@ PRODUCT_PACKAGES += \
     IconShapeSquircleOverlay \
     IconShapeTaperedRectOverlay \
     IconShapeTeardropOverlay \
-    IconShapeVesselOverlay \
-    LineageNavigationBarNoHint \
-    NavigationBarMode2ButtonOverlay
+    IconShapeVesselOverlay
+
+# Legal
+PRODUCT_SYSTEM_PROPERTIES += \
+    ro.lineagelegal.url=https://lineageos.org/legal
 
 # Media
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
@@ -89,6 +92,19 @@ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
 # SystemUI plugins
 PRODUCT_PACKAGES += \
     QuickAccessWallet
+
+# TextClassifier
+PRODUCT_PACKAGES += \
+    libtextclassifier_annotator_en_model \
+    libtextclassifier_annotator_universal_model \
+    libtextclassifier_actions_suggestions_universal_model \
+    libtextclassifier_lang_id_model
+
+PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
+    system/etc/textclassifier/actions_suggestions.universal.model \
+    system/etc/textclassifier/lang_id.model \
+    system/etc/textclassifier/textclassifier.en.model \
+    system/etc/textclassifier/textclassifier.universal.model
 
 # Themes
 PRODUCT_PACKAGES += \

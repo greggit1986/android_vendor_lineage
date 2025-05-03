@@ -3,8 +3,6 @@ $(call inherit-product-if-exists, vendor/extra/product.mk)
 
 PRODUCT_BRAND ?= LineageOS
 
-PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
-
 ifeq ($(PRODUCT_GMS_CLIENTID_BASE),)
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     ro.com.google.clientidbase=android-google
@@ -27,8 +25,13 @@ ifeq ($(TARGET_BUILD_VARIANT),eng)
 # Disable ADB authentication
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=0
 else
+ifdef WITH_ADB_INSECURE
+# Forcebly disable ADB authentication
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=0
+else
 # Enable ADB authentication
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=1
+endif
 
 # Disable extra StrictMode features on all non-engineering builds
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += persist.sys.strictmode.disable=true
@@ -72,9 +75,17 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.sip.voip.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/android.software.sip.voip.xml
 
+# Credential storage
+PRODUCT_PACKAGES += \
+    android.software.credentials.prebuilt.xml
+
 # Enable wireless Xbox 360 controller support
 PRODUCT_COPY_FILES += \
     frameworks/base/data/keyboards/Vendor_045e_Product_028e.kl:$(TARGET_COPY_OUT_PRODUCT)/usr/keylayout/Vendor_045e_Product_0719.kl
+
+# Component overrides
+PRODUCT_PACKAGES += \
+    lineage-component-overrides.xml
 
 # This is Lineage!
 PRODUCT_COPY_FILES += \
@@ -150,6 +161,9 @@ PRODUCT_PACKAGES += \
     setcap \
     vim
 
+PRODUCT_PACKAGES += \
+    nano_recovery
+
 PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
     system/bin/curl \
     system/bin/getcap \
@@ -167,6 +181,10 @@ PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
     system/bin/mount.ntfs \
     system/%/libfuse-lite.so \
     system/%/libntfs-3g.so
+
+# FRP
+PRODUCT_COPY_FILES += \
+    vendor/lineage/prebuilt/common/bin/wipe-frp.sh:$(TARGET_COPY_OUT_RECOVERY)/root/system/bin/wipe-frp
 
 # Openssh
 PRODUCT_PACKAGES += \
@@ -219,6 +237,11 @@ PRODUCT_DEXPREOPT_SPEED_APPS += \
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     dalvik.vm.systemuicompilerfilter=speed
 
+ifeq ($(TARGET_BUILD_VARIANT),userdebug)
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+    debug.sf.enable_transaction_tracing=false
+endif
+
 # SetupWizard
 PRODUCT_PRODUCT_PROPERTIES += \
     setupwizard.theme=glif_v4 \
@@ -231,7 +254,8 @@ PRODUCT_PACKAGE_OVERLAYS += \
 
 PRODUCT_PACKAGES += \
     DocumentsUIOverlay \
-    NetworkStackOverlay
+    NetworkStackOverlay \
+    PermissionControllerOverlay
 
 # Translations
 CUSTOM_LOCALES += \
