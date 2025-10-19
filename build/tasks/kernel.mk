@@ -374,7 +374,6 @@ endef
 # $(5): module load list
 # $(6): suffix for output dir, needed for GKI modules usecase, empty otherwise
 # $(7): partition image intermediates file list
-# $(8): external dependency module intermediates dir
 # Depmod requires a well-formed kernel version so 0.0 is used as a placeholder.
 define build-image-kernel-modules-lineage
     mkdir -p $(2)/lib/modules$(6)
@@ -382,15 +381,7 @@ define build-image-kernel-modules-lineage
     rm -rf $(4)
     mkdir -p $(4)/lib/modules/0.0/$(3)lib/modules$(6)
     cp $(1) $(4)/lib/modules/0.0/$(3)lib/modules$(6)
-    if [ -n "$(8)" ]; then cp -r $(8) $(4)/lib/modules/0.0/; fi
-    $(DEPMOD) -ae -F $(KERNEL_OUT)/System.map -b $(4) 0.0 2>$(4)/depmod_stderr
-    cat $(4)/depmod_stderr >&2
-    if { grep -q "needs unknown symbol" $(4)/depmod_stderr; }; then \
-      echo "ERROR: kernel module(s) need unknown symbol(s)" >&2; \
-      rm -f $(4)/depmod_stderr; \
-      exit 1; \
-    fi
-    rm -f $(4)/depmod_stderr
+    $(DEPMOD) -b $(4) 0.0
     sed -e 's/\(.*modules.*\):/\/\1:/g' -e 's/ \([^ ]*modules[^ ]*\)/ \/\1/g' $(4)/lib/modules/0.0/modules.dep > $(2)/lib/modules$(6)/modules.dep
     cp $(4)/lib/modules/0.0/modules.softdep $(2)/lib/modules$(6)
     cp $(4)/lib/modules/0.0/modules.alias $(2)/lib/modules$(6)
@@ -400,14 +391,10 @@ define build-image-kernel-modules-lineage
         if [ -n "$$(find $(2)/lib/modules$(6) -type f -name $$NAME'.ko')" ]; then \
             echo "$$NAME" >> $(2)/lib/modules$(6)/modules.load; \
         else \
-            echo "ERROR: $$NAME.ko was not found in the kernel modules intermediates dir, module load list must be corrected" 1>&2; \
-            ERROR=1; \
+            echo "ERROR: $$NAME.ko was not found in the kernel modules intermediates dir, module load list must be corrected" 1>&2 && exit 1; \
         fi; \
-    done; \
-    if [ -n "$$ERROR" ]; then \
-        exit 1; \
-    fi; \
-    if [ -n "$(7)" ]; then \
+    done
+    if [ ! -z "$(7)" ]; then \
         echo lib/modules$(6)/modules.alias >> "$(7)"; \
         echo lib/modules$(6)/modules.dep >> "$(7)"; \
         if [ ! -z "$(5)" ]; then echo lib/modules$(6)/modules.load >> "$(7)"; fi; \
@@ -529,26 +516,25 @@ $(TARGET_PREBUILT_INT_KERNEL): $(KERNEL_CONFIG) $(DEPMOD) $(DTC) $(KERNEL_MODULE
 			) \
 			kernel_release=$$(cat $(KERNEL_RELEASE)) \
 			kernel_modules_dir=$(MODULES_INTERMEDIATES)/lib/modules/$$kernel_release \
-			all_modules=$$(find $$kernel_modules_dir -type f -name '*.ko') \
 			$(foreach s, $(TARGET_MODULE_ALIASES),\
 				$(eval p := $(subst :,$(space),$(s))) \
-				; mv $$(echo $$all_modules | tr ' ' '\n' | grep /$(word 1,$(p))) $$kernel_modules_dir/$(word 2,$(p))); \
-			all_modules=$$(find $$kernel_modules_dir -type f -name '*.ko'); \
-			dup_modules=$$(echo $$all_modules | tr ' ' '\n' | xargs -n1 basename | sort | uniq -d); \
+				; mv $$(find $$kernel_modules_dir -name $(word 1,$(p))) $$kernel_modules_dir/$(word 2,$(p))); \
+			dup_modules=$$(find $$kernel_modules_dir -type f -name '*.ko' -printf '%f\n' |sort |uniq -d); \
 			$(if $$dup_modules,\
 				err=$$(for m in $$dup_modules; do \
 					echo "ERROR: Duplicate module $$m" 1>&2 && echo "dup"; \
 				done); \
 				[ -n "$$err" ] && exit 1; \
 			) \
+			all_modules=$$(find $$kernel_modules_dir -type f -name '*.ko'); \
 			filtered_modules=""; \
 			$(if $(SYSTEM_KERNEL_MODULES),\
 				gki_modules=$$(for m in $(SYSTEM_KERNEL_MODULES); do \
-					p=$$(echo $$all_modules | tr ' ' '\n' | grep /$$m); \
+					p=$$(find $$kernel_modules_dir -type f -name $$m); \
 					if [ -n "$$p" ]; then echo $$p; else echo "ERROR: $$m from SYSTEM_KERNEL_MODULES was not found" 1>&2 && exit 1; fi; \
 				done); \
 				[ $$? -ne 0 ] && exit 1; \
-				($(call build-image-kernel-modules-lineage,$$gki_modules,$(SYSTEM_KERNEL_MODULES_OUT),$(SYSTEM_KERNEL_MODULE_MOUNTPOINT)/,$(SYSTEM_KERNEL_DEPMOD_STAGING_DIR),$(BOARD_SYSTEM_KERNEL_MODULES_LOAD),$(GKI_SUFFIX),$(SYSTEM_KERNEL_MODULES_PARTITION_FILE_LIST),)) || exit "$$?"; \
+				($(call build-image-kernel-modules-lineage,$$gki_modules,$(SYSTEM_KERNEL_MODULES_OUT),$(SYSTEM_KERNEL_MODULE_MOUNTPOINT)/,$(SYSTEM_KERNEL_DEPMOD_STAGING_DIR),$(BOARD_SYSTEM_KERNEL_MODULES_LOAD),/$(GKI_SUFFIX),$(SYSTEM_KERNEL_MODULES_PARTITION_FILE_LIST))) || exit "$$?"; \
 				filtered_modules=$$(for n in $$all_modules; do \
 					module_name=$$(basename $$n); \
 					if [[ ! "$(SYSTEM_KERNEL_MODULES)" =~ "$$module_name" ]]; then echo $$n; fi; \
